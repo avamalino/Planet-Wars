@@ -26,17 +26,30 @@ def setup_behavior_tree():
     # Top-down construction of behavior tree
     root = Selector(name='High Level Ordering of Strategies')
 
-    offensive_plan = Sequence(name='Offensive Strategy')
-    largest_fleet_check = Check(have_largest_fleet)
-    attack = Action(attack_weakest_enemy_planet)
-    offensive_plan.child_nodes = [largest_fleet_check, attack]
+    # Defensive strategy: reinforce threatened planets
+    defense_seq = Sequence(name='Defense Strategy')
+    threat_check = Check(weak_planet_under_threat)
+    reinforce = Action(reinforce_weak_planets)
+    defense_seq.child_nodes = [threat_check, reinforce]
 
-    spread_sequence = Sequence(name='Spread Strategy')
-    neutral_planet_check = Check(if_neutral_planet_available)
+    # Expansion strategy: early game spread
+    spread_seq = Sequence(name='Spread Strategy')
+    neutral_check = Check(if_neutral_planet_available)
     spread_action = Action(spread_to_weakest_neutral_planet)
-    spread_sequence.child_nodes = [neutral_planet_check, spread_action]
+    spread_seq.child_nodes = [neutral_check, spread_action]
 
-    root.child_nodes = [offensive_plan, spread_sequence, attack.copy()]
+    # Offensive strategy: attack enemy if we have largest fleet
+    offensive_seq = Sequence(name='Offensive Strategy')
+    fleet_check = Check(have_largest_fleet)
+    attack_action = Action(attack_weakest_enemy_planet)
+    offensive_seq.child_nodes = [fleet_check, attack_action]
+
+    # Top-level: defense > expansion > attack
+    root.child_nodes = [defense_seq, spread_seq, offensive_seq]
+
+    #root.child_nodes = defence sequence, early game, expand, late game, attack]
+
+    # root.child_nodes = [spread_sequence, offensive_plan]#, attack.copy()]
 
     logging.info('\n' + root.tree_to_string())
     return root
