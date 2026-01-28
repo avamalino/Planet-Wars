@@ -27,11 +27,15 @@ def spread_to_weakest_neutral_planet(state):
     my_planets = state.my_planets()
     neutral_planets = state.neutral_planets()
     
+    #when this returns then we go on offense
     if not my_planets or not neutral_planets:
         return False
 
     # 1. Identify the strongest planet
     strongest = max(my_planets, key=lambda p: p.num_ships)
+
+    #maybe try a check when you have more than 3 strong planets with
+    #more than 50-80 ships, then change strongest to strongests (plural)
     
     # 2. Local budget (keep 5 ships for defense)
     available_budget = strongest.num_ships - 5
@@ -51,7 +55,7 @@ def spread_to_weakest_neutral_planet(state):
         if any(f.destination_planet == target.ID for f in state.my_fleets()):
             continue
             
-        ships_needed = target.num_ships + 10
+        ships_needed = target.num_ships + 1
         
         # 4. If we have enough in our budget, send the fleet
         if available_budget >= ships_needed:
