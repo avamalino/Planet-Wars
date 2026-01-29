@@ -27,7 +27,10 @@ def attack_weakest_enemy_planet(state):
         close_weakest = their_planets
 
     for i in close_weakest:
-        issue_order(state, strongest_ally.ID, i.ID, i.num_ships + 1)
+        distance = state.distance(strongest_ally.ID, i.ID)
+        future_ships = i.num_ships + i.growth_rate * distance
+        ships_needed = future_ships + 1
+        issue_order(state, strongest_ally.ID, i.ID, ships_needed)
 
     return True
 
@@ -43,9 +46,6 @@ def spread_to_weakest_neutral_planet(state):
 
     # 1. Identify the strongest planet
     strongest = max(my_planets, key=lambda p: p.num_ships)
-
-    #maybe try a check when you have more than 3 strong planets with
-    #more than 50-80 ships, then change strongest to strongests (plural)
     
     # 2. Local budget (keep 5 ships for defense)
     #note: a dynamic num of min ships takes too much time
@@ -75,7 +75,9 @@ def spread_to_weakest_neutral_planet(state):
         # Don't double-target a planet already being captured
         if any(f.destination_planet == target.ID for f in state.my_fleets()):
             continue
-            
+        distance = state.distance(strongest.ID, target.ID)
+        future_ships = target.num_ships + target.growth_rate * distance
+        ships_needed = future_ships + 1
         ships_needed = target.num_ships + 1
         
         # 4. If we have enough in our budget, send the fleet
@@ -111,11 +113,14 @@ def reinforce_weak_planets(state):
         return False
     
     #which ally planet is most threatened and how many incoming ships are there?
-    most_threatened, incoming = max(threatened, key=lambda x: x[1] - x[0].num_ships)
+    most_threatened, incoming = max(
+        threatened, 
+        key=lambda x: (x[0].growth_rate, x[1] - x[0].num_ships))
 
     needed = incoming - most_threatened.num_ships + 1
 
-    MAX_DISTANCE = 10
+    
+    MAX_DISTANCE = 15
 
     #strongest and closest ally planets to send troops from
     candidates = [
@@ -129,6 +134,7 @@ def reinforce_weak_planets(state):
         return False
     
     #find which planet to send troops from
+
     helper = max(candidates, key= lambda p: (p.num_ships, -state.distance(p.ID, most_threatened.ID)))
     
     issue_order(state, helper.ID, most_threatened.ID, needed)

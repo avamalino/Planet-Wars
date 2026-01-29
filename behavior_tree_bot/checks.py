@@ -7,6 +7,8 @@ def weak_planet_under_threat(state):
             return True
     return False
 
+
+
 # EARLY
 
 def if_neutral_planet_available(state):
