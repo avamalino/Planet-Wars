@@ -4,28 +4,18 @@ from planet_wars import issue_order
 
 
 def attack_weakest_enemy_planet(state):
-    ## (1) If we currently have a fleet in flight, abort plan.
-    #if len(state.my_fleets()) >= 1:
-    #    return False
+    #Offense will find the strongest ally nearest to the weakest enemy
+    #and send the current number of ships the enemy has + 1 to take it over
+    #this obviously won't capture the enemy as the enemy will be growing
+    #ships while the fleets are sent out, but it will be weakened so the next
+    #time fleets are sent out, it will capture the planet
+    #also makes sure to prevent our planets from sending out a dangerous
+    #amount of fleets to capture an enemy
 
-    ## (2) Find my strongest planet.
-    #strongest_planet = max(state.my_planets(), key=lambda t: t.num_ships, default=None)
-
-    ## (3) Find the weakest enemy planet.
-    #weakest_planet = min(state.enemy_planets(), key=lambda t: t.num_ships, default=None)
-
-    #if not strongest_planet or not weakest_planet:
-    #    # No legal source or destination
-    #    return False
-    #else:
-    #    # (4) Send half the ships from my strongest planet to the weakest enemy planet.
-    #    return issue_order(state, strongest_planet.ID, weakest_planet.ID, strongest_planet.num_ships / 2)
-
-    #(1) find the strongest ally planets around the weakest enemy planet
     my_planets = state.my_planets()
     their_planets = state.enemy_planets()
     strongest_ally = max(my_planets, key=lambda p: p.num_ships, default=None)
-    weakest_enemy = min(state.enemy_planets(), key=lambda t: t.num_ships, default=None)
+    #weakest_enemy = min(state.enemy_planets(), key=lambda t: t.num_ships, default=None)
 
     MAX_DISTANCE = 15
     close_weakest = [
