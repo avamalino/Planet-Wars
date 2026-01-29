@@ -26,6 +26,11 @@ def setup_behavior_tree():
     # Top-down construction of behavior tree
     root = Selector(name='High Level Ordering of Strategies')
 
+    #need a strict early game spread strategy
+
+    #if overpowered and weak strategy. First go into defense mode
+    #then go into offense mode and attack nearest weak enemy planets
+
     # Defensive strategy: reinforce threatened planets
     defense_seq = Sequence(name='Defense Strategy')
     threat_check = Check(weak_planet_under_threat)
