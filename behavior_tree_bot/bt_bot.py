@@ -26,11 +26,6 @@ def setup_behavior_tree():
     # Top-down construction of behavior tree
     root = Selector(name='High Level Ordering of Strategies')
 
-    #need a strict early game spread strategy
-
-    #if overpowered and weak strategy. First go into defense mode
-    #then go into offense mode and attack nearest weak enemy planets
-
     # Defensive strategy: reinforce threatened planets
     defense_seq = Sequence(name='Defense Strategy')
     threat_check = Check(weak_planet_under_threat)
@@ -42,12 +37,6 @@ def setup_behavior_tree():
     neutral_check = Check(if_neutral_planet_available)
     spread_action = Action(spread_to_weakest_neutral_planet)
     spread_seq.child_nodes = [neutral_check, spread_action]
-
-    # Offensive strategy: attack enemy if we have largest fleet
-    offensive_seq = Sequence(name='Offensive Strategy')
-    fleet_check = Check(have_largest_fleet)
-    attack_action = Action(attack_weakest_enemy_planet)
-    offensive_seq.child_nodes = [fleet_check, attack_action]
 
     #beginning
     spread = Sequence(name='spread')
@@ -61,20 +50,11 @@ def setup_behavior_tree():
     offensive_seq = Sequence(name='Offensive Strategy')
     fleet_check = Check(have_largest_fleet)
     attack_action = Action(attack_weakest_enemy_planet)
-    #new
-    check_threat = Check(weak_planet_under_threat)
-    reinforcements = Action(reinforce_weak_planets)
-    offensive_seq.child_nodes = [fleet_check, attack_action, check_threat, reinforcements]
+    offensive_seq.child_nodes = [fleet_check, attack_action]#, check_threat, reinforcements]
 
     # Top-level: defense > expansion > attack
     #normal
-    #root.child_nodes = [defense_seq, spread_seq, offensive_seq]
-    #just trying
-    root.child_nodes = [spread, defense_seq, offensive_seq]
-
-    #root.child_nodes = defence sequence, early game, expand, late game, attack]
-
-    # root.child_nodes = [spread_sequence, offensive_plan]#, attack.copy()]
+    root.child_nodes = [defense_seq, spread_seq, offensive_seq]
 
     logging.info('\n' + root.tree_to_string())
     return root

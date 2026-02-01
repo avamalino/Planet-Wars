@@ -15,18 +15,17 @@ def attack_weakest_enemy_planet(state):
     my_planets = state.my_planets()
     their_planets = state.enemy_planets()
     strongest_ally = max(my_planets, key=lambda p: p.num_ships, default=None)
-    #weakest_enemy = min(state.enemy_planets(), key=lambda t: t.num_ships, default=None)
-
+    
     MAX_DISTANCE = 15
-    close_weakest = [
+    close_enemies = [
         p for p in their_planets
         if state.distance(strongest_ally.ID, p.ID) <= MAX_DISTANCE
     ]   
     
-    if not close_weakest:
-        close_weakest = their_planets
-
-    for i in close_weakest:
+    if not close_enemies:
+        close_enemies = their_planets
+    
+    for i in close_enemies:
         distance = state.distance(strongest_ally.ID, i.ID)
         future_ships = i.num_ships + i.growth_rate * distance
         ships_needed = future_ships + 1
@@ -34,12 +33,50 @@ def attack_weakest_enemy_planet(state):
 
     return True
 
+def middle(items, key=None):
+    items = sorted(items, key=key)
+    return items[len(items) // 2]
+
+#my medium strongest planets attack their weakest
+def pawns_attack_weakest(state):
+    my_planets = state.my_planets()
+    their_planets = state.enemy_planets()
+
+    if not my_planets or not their_planets:
+        return False
+    
+    pawn_planet = middle(my_planets, key=lambda p: p.num_ships)
+
+    MAX_DISTANCE = 15
+
+    close_enemies = [
+        p for p in their_planets
+        if state.distance(pawn_planet.ID, p.ID) <= MAX_DISTANCE
+    ]   
+    
+    if not close_enemies:
+        close_enemies = their_planets
+    
+    weakest_nearby = min(close_enemies, key=lambda p: p.num_ships)
+
+    for i in close_enemies:
+        distance = state.distance(pawn_planet.ID, weakest_nearby.ID)
+        future_ships = weakest_nearby.num_ships + weakest_nearby.growth_rate * distance
+        ships_needed = future_ships + 1
+        if pawn_planet.num_ships > ships_needed:
+            issue_order(state, pawn_planet.ID, weakest_nearby.ID, ships_needed)
+            return True
+    
+    return False
+
 
 def spread_to_weakest_neutral_planet(state):
 
-    my_planets = state.my_planets()
-    neutral_planets = state.neutral_planets()
+    my_planets = iter(sorted(state.my_planets(), key=lambda p: p.num_ships))
+    neutral_planets = [planet for planet in state.neutral_planets()
+                      if not any(fleet.destination_planet == planet.ID for fleet in state.my_fleets())]
     
+
     #when this returns then we go on offense
     if not my_planets or not neutral_planets:
         return False
@@ -95,6 +132,27 @@ def spread_to_weakest_neutral_planet(state):
 
 
 # DEFENSE
+
+def if_threatened_dont_help(state, planet):
+    timeline = {}
+    for fleet in state.enemy_fleets():
+        if fleet.destination_planet == planet.ID:
+            timeline.setdefault(fleet.turns_remaining, 0)
+            timeline[fleet.turns_remaining] -= fleet.num_ships
+
+    for fleet in state.my_fleets():
+        if fleet.destination_planet == planet.ID:
+            timeline.setdefault(fleet.turns_remaining, 0)
+            timeline[fleet.turns_remaining] += fleet.num_ships
+
+    max_threat = 0
+    current = 0
+
+    for t in sorted(timeline):
+        current += timeline[t]
+        max_threat = min(max_threat, current)
+    
+    return abs(max_threat)
 
 def reinforce_weak_planets(state):
     #find threatened planets through seeing if enemy ships are coming to a planet

@@ -60,11 +60,12 @@ if __name__ == '__main__':
                  'opponent_bots/defensive_bot.py',
                  'opponent_bots/production_bot.py']
 
-    maps = [56,56,56,56,56]  #71,13,24,56,7
+    maps = [71,13,24,56,7]  #71,13,24,56,7
     #lose against 71 w/ spread bot (won)
     #lose against 13 w/ production bot (lost)
     #lose against 56 w/ spread, aggressive, and production bot (L,L,W)
     #lose against 7 w/ aggressive bot (won)
+    #bad maps: 2, 4,6,8,10(lost agg),12,13(production)
 
     my_bot = 'behavior_tree_bot/bt_bot.py'
     show = len(sys.argv) < 2 or sys.argv[1] == "show"

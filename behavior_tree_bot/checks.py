@@ -7,6 +7,35 @@ def weak_planet_under_threat(state):
             return True
     return False
 
+def enemy_has_more_strong_planets(state, margin=1):
+    STRONG_GROWTH = 3
+
+    my_strong = sum(
+        1 for p in state.my_planets()
+        if p.growth_rate >= STRONG_GROWTH
+    )
+
+    enemy_strong = sum(
+        1 for p in state.enemy_planets()
+        if p.growth_rate >= STRONG_GROWTH
+    )
+
+    return enemy_strong >= my_strong + margin
+
+def enemy_growth_advantage(state, factor=1.3):
+    my_growth = sum(p.growth_rate for p in state.my_planets())
+    enemy_growth = sum(p.growth_rate for p in state.enemy_planets())
+
+    if my_growth == 0:
+        return True
+    
+    return enemy_growth >= my_growth * factor
+
+def should_turtle(state):
+    return (
+        weak_planet_under_threat(state)
+        or enemy_growth_advantage(state, factor=1.25)
+    )
 
 
 # EARLY

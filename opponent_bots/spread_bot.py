@@ -12,6 +12,7 @@ from planet_wars import PlanetWars, issue_order, finish_turn
 def spread(state):
     my_planets = iter(sorted(state.my_planets(), key=lambda p: p.num_ships))
 
+    #do any of the neutral planets have fleets already being sent?
     neutral_planets = [planet for planet in state.neutral_planets()
                       if not any(fleet.destination_planet == planet.ID for fleet in state.my_fleets())]
     neutral_planets.sort(key=lambda p: p.num_ships)
