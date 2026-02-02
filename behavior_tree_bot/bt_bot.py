@@ -57,6 +57,11 @@ def setup_behavior_tree():
     root.child_nodes = [defense_seq, spread_seq, offensive_seq]
 
     logging.info('\n' + root.tree_to_string())
+
+    #print text file
+    # with open('output_file.txt', 'w') as f:
+    #     print(root.tree_to_string(), file = f)
+
     return root
 
 # You don't need to change this function
